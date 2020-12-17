@@ -1,25 +1,29 @@
 var baseUrl = 'http://geo2.24bpd.ru';
 var ukey = 'go654zxxq4mtiftkfkqvcsyf';
 var skey = '';
+var limit = 5;
 /** Таймер для задержки в автодополнении */
 var timer = null;
 
 //  Создаем элементы динамически
-var controlDiv = document.createElement('div');
-controlDiv.className = 'ol-unselectable ol-control';
-controlDiv.style.cssText = 'position: absolute; left: 40px; top: 10px';
+var searchControlElem = document.createElement('div');
+searchControlElem.className = 'ol-unselectable ol-control';
+searchControlElem.style.cssText = 'position: absolute; left: 40px; top: 10px';
+
 var input = document.createElement('input');
+input.id = 'itemSearcher';
 input.placeholder = 'Поиск';
 input.style.cssText = 'width: 400px; padding: 4px';
 input.addEventListener('keyup', search);
-controlDiv.append(input);
+searchControlElem.append(input);
+
 var suggestionList = document.createElement('ul');
-suggestionList.style.cssText = 'margin: 0; padding: 0; list-style-type: none; li:hover {background-color: #00ff00}';
-controlDiv.append(suggestionList);
+suggestionList.style.cssText = 'margin: 0; padding: 0; list-style-type: none;';
+searchControlElem.append(suggestionList);
 
 // Добавляем контрол к OpenLayers
 var SearchControl = new ol.control.Control({
-	element: controlDiv
+	element: searchControlElem
 });
 map.addControl(SearchControl);
 
@@ -41,40 +45,42 @@ function search(e) {
 
 	// если пустая строка - выходим
 	if (searchText.length === 0) return;
+
+	if (!limit) limit = 5;
 	
-	// Делаем задержку перед поиском (400мс)
+	// Делаем задержку перед поиском (400 мс)
 	clearTimeout(timer);
 	timer = setTimeout(function () {
 		$.getJSON(baseUrl + '/firms/1.0/', {
 			skey: skey,
 			q: searchText,
-			limit: 5,
+			limit: limit,
 			detailed: 'true',
 			format: 'json'
 		})
-			.done(data => {
-				if (data && data.organizations) {
-					addSuggestions(data.organizations.organizations);
-				}
-			});
+		.done(data => {
+			if (data && data.organizations) {
+				addSuggestions(data.organizations.organizations);
+			}
+		});
 		$.getJSON(baseUrl + '/transport_stops/1.0/', {
 			skey: skey,
 			q: searchText,
-			limit: 5,
+			limit: limit,
 			format: 'json'
 		})
-			.done(data => {
-				if (data && data.stops) {
-					addSuggestions(data.stops);
-				}
-			});
+		.done(data => {
+			if (data && data.stops) {
+				addSuggestions(data.stops);
+			}
+		});
 	}, 400 || 0);
 };
 
 /** Добавление элементов в список */
 function addSuggestions(suggestions) {
 	var sugItem
-	suggestions.forEach(function (sug) {
+	suggestions.forEach(sug => {
 		sugItem = document.createElement('li');
 		sugItem.textContent = sug.name;
 		sugItem.style.padding = '4px';
@@ -101,9 +107,9 @@ function getSessionKey() {
 		ukey: ukey,
 		format: 'json'
 	})
-		.done(data => {
-			if (data && data.skey) {
-				skey = data.skey;
-			}
-		});
+	.done(data => {
+		if (data && data.skey) {
+			skey = data.skey;
+		}
+	});
 }

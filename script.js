@@ -14,7 +14,7 @@ var input = document.createElement('input');
 input.id = 'itemSearcher';
 input.placeholder = 'Поиск';
 input.style.cssText = 'width: 400px; padding: 4px';
-input.addEventListener('keyup', search);
+input.addEventListener('input', search);
 searchControlElem.append(input);
 
 var suggestionList = document.createElement('ul');
@@ -93,12 +93,10 @@ function addSuggestions(suggestions) {
 /** когда выбран один элемент из списка */
 function itemSelected(event) {
 	const reg = /(?<x>[.\d]+) (?<y>[.\d]+)/; 
-	const match = reg.exec(event.target.geocenter);
-	var point = {
-		x: match.groups['x'],
-		y: match.groups['y']
-	}
-	console.log(point);
+	const point = reg.exec(event.target.geocenter).groups;
+	const itemEvent = new CustomEvent('onItemSelected');
+	itemEvent.point = point;
+	input.dispatchEvent(itemEvent);
 }
 
 // получить skey по ukey

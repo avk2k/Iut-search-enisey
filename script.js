@@ -58,7 +58,7 @@ function search(e) {
 			detailed: 'true',
 			format: 'json'
 		})
-		.done(data => {
+		.done(function(data) {
 			if (data && data.organizations) {
 				addSuggestions(data.organizations.organizations);
 			}
@@ -69,7 +69,7 @@ function search(e) {
 			limit: limit,
 			format: 'json'
 		})
-		.done(data => {
+		.done(function (data) {
 			if (data && data.stops) {
 				addSuggestions(data.stops);
 			}
@@ -80,7 +80,7 @@ function search(e) {
 /** Добавление элементов в список */
 function addSuggestions(suggestions) {
 	var sugItem
-	suggestions.forEach(sug => {
+	suggestions.forEach(function(sug) {
 		sugItem = document.createElement('li');
 		sugItem.textContent = sug.name;
 		sugItem.style.padding = '4px';
@@ -99,7 +99,7 @@ function itemSelected(event) {
 		x: Number.parseFloat(match.groups['x']),
 		y: Number.parseFloat(match.groups['y'])
 	}
-	
+
 	// Центрируем карту по выбранному объекту
 	map.getView().setCenter(ol.proj.transform([point.x, point.y], 'EPSG:4326', 'EPSG:3857'));
 	map.getView().setZoom(16);
@@ -115,7 +115,7 @@ function getSessionKey() {
 		ukey: ukey,
 		format: 'json'
 	})
-	.done(data => {
+	.done(function(data) {
 		if (data && data.skey) {
 			skey = data.skey;
 		}

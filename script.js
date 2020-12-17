@@ -1,43 +1,36 @@
 var baseUrl = 'http://geo2.24bpd.ru';
-
 var ukey = 'go654zxxq4mtiftkfkqvcsyf';
 var skey = '';
-
+/** Таймер для задержки в автодополнении */
 var timer = null;
 
+//  Создаем элементы динамически
 var controlDiv = document.createElement('div');
 controlDiv.className = 'ol-unselectable ol-control';
 controlDiv.style.cssText = 'position: absolute; left: 40px; top: 10px';
-
 var input = document.createElement('input');
 input.placeholder = 'Поиск';
 input.style.cssText = 'width: 400px; padding: 4px';
 input.addEventListener('keyup', search);
 controlDiv.append(input);
-
 var suggestionList = document.createElement('ul');
-suggestionList.style.cssText = 'margin: 0; padding: 0; list-style-type: none';
+suggestionList.style.cssText = 'margin: 0; padding: 0; list-style-type: none; li:hover {background-color: #00ff00}';
 controlDiv.append(suggestionList);
 
+// Добавляем контрол к OpenLayers
 var SearchControl = new ol.control.Control({
 	element: controlDiv
 });
 map.addControl(SearchControl);
 
+// Если не задан сессионный ключ, то получаем его
 if (!skey) {
 	getSessionKey();
 }
 
-
-function delay(callback, ms) {
-	return function () {
-		var context = this, args = arguments;
-		clearTimeout(timer);
-		timer = setTimeout(function () {
-			callback.apply(context, args);
-		}, ms || 0);
-	};
-}
+// ---------------------------------------------------------------------------------
+// Далее идут вспомогательные функции
+// ---------------------------------------------------------------------------------
 
 /** Поиск по тексту */
 function search(e) {
@@ -75,40 +68,10 @@ function search(e) {
 					addSuggestions(data.stops);
 				}
 			});
-	}, 500 || 0);
-
-	return;
-
-	delay(function (searchText) {
-		console.log(searchText);
-		return;
-		$.getJSON(baseUrl + '/firms/1.0/', {
-			skey: skey,
-			q: searchText,
-			limit: 5,
-			detailed: 'true',
-			format: 'json'
-		})
-			.done(data => {
-				if (data && data.organizations) {
-					addSuggestions(data.organizations.organizations);
-				}
-			});
-		$.getJSON(baseUrl + '/transport_stops/1.0/', {
-			skey: skey,
-			q: searchText,
-			limit: 5,
-			format: 'json'
-		})
-			.done(data => {
-				if (data && data.stops) {
-					addSuggestions(data.stops);
-				}
-			});
-	}, 500)(searchText);
+	}, 400 || 0);
 };
 
-// добавляем элементы в список
+/** Добавление элементов в список */
 function addSuggestions(suggestions) {
 	var sugItem
 	suggestions.forEach(function (sug) {
@@ -121,10 +84,15 @@ function addSuggestions(suggestions) {
 	});
 }
 
-// когда выбран один элемент из списка
+/** когда выбран один элемент из списка */
 function itemSelected(event) {
-	var geocenter = event.target.geocenter.replace('POINT(', '').replace(')', '');
-	console.log(geocenter);
+	const reg = /(?<x>[.\d]+) (?<y>[.\d]+)/; 
+	const match = reg.exec(event.target.geocenter);
+	var point = {
+		x: match.groups['x'],
+		y: match.groups['y']
+	}
+	console.log(point);
 }
 
 // получить skey по ukey

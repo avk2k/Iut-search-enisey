@@ -15,6 +15,7 @@ input.id = 'itemSearcher';
 input.placeholder = 'Поиск';
 input.style.cssText = 'width: 400px; padding: 4px';
 input.addEventListener('input', search);
+input.addEventListener('keydown', clear);
 searchControlElem.append(input);
 var suggestionList = document.createElement('ul');
 suggestionList.id = 'suggestions';
@@ -102,6 +103,14 @@ function search(e) {
 			});
 	}, 400 || 0);
 };
+
+/** Закрытие всплывающего окна по кнопке Escape */
+function clear(e) {
+	if (e.keyCode === 27) {
+		input.value = '';
+		suggestionList.innerHTML = '';
+	}
+}
 
 /** Добавление элементов в список */
 function addSuggestions(suggestions, type) {
